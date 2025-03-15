@@ -4,6 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "GameFramework/SpringArmComponent.h"
+#include "Camera/CameraComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "PlayerAvatar.generated.h"
 
 UCLASS(Blueprintable)
@@ -55,6 +58,25 @@ public:
 	void Attack();
 	void Hit(int damage);
 
+	FORCEINLINE USpringArmComponent* GetSpringArmComponent() const
+	{
+		return _springArmComponent;
+	}
+
+	FORCEINLINE UCameraComponent* GetCameraComponent() const
+	{
+		return _cameraComponent;
+	}
+
 protected:
 	void DieProcess();
+
+private:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
+	class USpringArmComponent* _springArmComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
+	class UCameraComponent* _cameraComponent;
+
+
 };
