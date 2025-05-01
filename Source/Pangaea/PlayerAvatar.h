@@ -68,8 +68,10 @@ public:
 		return _cameraComponent;
 	}
 
-protected:
 	void DieProcess();
+
+protected:
+	
 
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))

@@ -55,6 +55,16 @@ void APlayerAvatar::Tick(float DeltaTime)
 
 	UPlayerAvatarAnimInstance* animInst = Cast<UPlayerAvatarAnimInstance>(GetMesh()->GetAnimInstance());
 	animInst->Speed = GetCharacterMovement()->Velocity.Size2D();
+
+	if (_AttackCountingDown == AttackInterval)
+	{
+		animInst->State = EPlayerState::Attack;
+	}
+
+	if (_AttackCountingDown > 0.0f)
+	{
+		_AttackCountingDown -= DeltaTime;
+	}
 }
 
 // Called to bind functionality to input
@@ -76,6 +86,21 @@ bool APlayerAvatar::IsKilled()
 
 bool APlayerAvatar::CanAttack()
 {
-	return false;
+	UPlayerAvatarAnimInstance* animInst = Cast<UPlayerAvatarAnimInstance>(GetMesh()->GetAnimInstance());
+	return (_AttackCountingDown <= 0.0f && animInst->State == EPlayerState::Locomotion);
+}
+
+void APlayerAvatar::Attack()
+{
+	_AttackCountingDown = AttackInterval;
+}
+
+void APlayerAvatar::DieProcess()
+{
+	//PrimaryActorTick.bCanEverTick = false; // 틱에서 캐릭터 제외
+	//Destroy(); // 파괴
+	//GEngine->ForceGarbageCollection(true); // 가비지 컬렉션 수행
+
+	Destroy(); // 위 3줄을 한줄로 치환가능
 }
 
