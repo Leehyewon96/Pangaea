@@ -10,6 +10,13 @@ UCLASS(Blueprintable)
 class APangaeaCharacter : public ACharacter
 {
 	GENERATED_BODY()
+	
+public:
+	UPROPERTY(EditAnywhere, Category = "Pangaea Character Params")
+	float AttackRange = 200.0f;		//the character's attack range
+
+	UPROPERTY(EditAnywhere, Category = "Pangaea Character Params")
+	float Strength = 5;			//the character's attack strength
 
 public:
 	APangaeaCharacter();
@@ -21,6 +28,8 @@ public:
 	FORCEINLINE class UCameraComponent* GetTopDownCameraComponent() const { return TopDownCameraComponent; }
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
+	
+	bool IsAttacking();
 
 private:
 	/** Top down camera */

@@ -49,3 +49,8 @@ void APangaeaCharacter::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
 }
+
+bool APangaeaCharacter::IsAttacking()
+{
+	return false;
+}

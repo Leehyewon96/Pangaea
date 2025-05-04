@@ -1,51 +1,45 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "PlayerAvatar.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "PlayerAvatarAnimInstance.h"
 
 // Sets default values
 APlayerAvatar::APlayerAvatar()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	//카메라 스프링암 생성
-	_springArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
-	_springArmComponent->SetupAttachment(RootComponent);
-	_springArmComponent->SetUsingAbsoluteRotation(true);
-	_springArmComponent->TargetArmLength = 800.f;
-	_springArmComponent->SetRelativeRotation(FRotator(-60.f, 0.f, 0.f));
-	_springArmComponent->bDoCollisionTest = false;
-
-	
-
-	//카메라 생성
-	_cameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
-	_cameraComponent->SetupAttachment(_springArmComponent, USpringArmComponent::SocketName);
-	_cameraComponent->bUsePawnControlRotation = false;
-
-	//게임 프레임이 업데이트될 때마다 캐릭터의 Tick 함수를 호출할 수 있도록 함
-	PrimaryActorTick.bCanEverTick = true;
-
-	//내려보기 형식이므로 캐릭터가 달리는 방향만 결정하면 됨 (캐릭터가 회전할 필요 없음)
+	// Don't rotate character to camera direction
 	bUseControllerRotationPitch = false;
-	bUseControllerRotationRoll = false;
 	bUseControllerRotationYaw = false;
+	bUseControllerRotationRoll = false;
 
-	auto* characterMovement = GetCharacterMovement();
-	characterMovement->bOrientRotationToMovement = true;
+	// Configure character movement
+	auto characterMovement = GetCharacterMovement();
+	characterMovement->bOrientRotationToMovement = true; // Rotate character to moving direction
 	characterMovement->RotationRate = FRotator(0.f, 640.f, 0.f);
 	characterMovement->bConstrainToPlane = true;
 	characterMovement->bSnapToPlaneAtStart = true;
-	
+
+	// Create the camera spring arm
+	_springArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
+	_springArmComponent->SetupAttachment(RootComponent);		//Attach to the character root
+	_springArmComponent->SetUsingAbsoluteRotation(true);		//Don't rotate the arm with the character
+	_springArmComponent->TargetArmLength = 800.f;				//Set the arm's length 
+	_springArmComponent->SetRelativeRotation(FRotator(-60.f, 0.f, 0.f));
+	//Set the arm's rotation (60 degree up)
+	_springArmComponent->bDoCollisionTest = false;				//No collision test
+
+	// Create the camera
+	_cameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
+	_cameraComponent->SetupAttachment(_springArmComponent, USpringArmComponent::SocketName);
+	//Attach to the spring arm
+	_cameraComponent->bUsePawnControlRotation = false;			//Camera rotation is not controllable  
 }
 
 // Called when the game starts or when spawned
 void APlayerAvatar::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	_HealthPoints = HealthPoints;
 }
 
 // Called every frame
@@ -53,7 +47,7 @@ void APlayerAvatar::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	UPlayerAvatarAnimInstance* animInst = Cast<UPlayerAvatarAnimInstance>(GetMesh()->GetAnimInstance());
+	auto animInst = Cast<UPlayerAvatarAnimInstance>(GetMesh()->GetAnimInstance());
 	animInst->Speed = GetCharacterMovement()->Velocity.Size2D();
 
 	if (_AttackCountingDown == AttackInterval)
@@ -76,31 +70,36 @@ void APlayerAvatar::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 int APlayerAvatar::GetHealthPoints()
 {
-	return 0;
+	return _HealthPoints;
 }
+
 
 bool APlayerAvatar::IsKilled()
 {
-	return false;
+	return (_HealthPoints <= 0.0f);
 }
+
 
 bool APlayerAvatar::CanAttack()
 {
-	UPlayerAvatarAnimInstance* animInst = Cast<UPlayerAvatarAnimInstance>(GetMesh()->GetAnimInstance());
+	auto animInst = Cast<UPlayerAvatarAnimInstance>(GetMesh()->GetAnimInstance());
 	return (_AttackCountingDown <= 0.0f && animInst->State == EPlayerState::Locomotion);
 }
+
 
 void APlayerAvatar::Attack()
 {
 	_AttackCountingDown = AttackInterval;
 }
 
-void APlayerAvatar::DieProcess()
+void APlayerAvatar::Hit(int damage)
 {
-	//PrimaryActorTick.bCanEverTick = false; // 틱에서 캐릭터 제외
-	//Destroy(); // 파괴
-	//GEngine->ForceGarbageCollection(true); // 가비지 컬렉션 수행
 
-	Destroy(); // 위 3줄을 한줄로 치환가능
 }
 
+void APlayerAvatar::DieProcess()
+{
+	PrimaryActorTick.bCanEverTick = false;
+	Destroy();
+	GEngine->ForceGarbageCollection(true);
+}

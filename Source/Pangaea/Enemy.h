@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Weapon.h"
 #include "GameFramework/Character.h"
 #include "Enemy.generated.h"
 
@@ -37,6 +38,9 @@ protected:
 	int _HealthPoints;
 	float _AttackCountingDown;
 	APawn* _ChasedTarget = nullptr;
+
+	UClass* _WeaponClass;
+	AWeapon* _Weapon;
 
 public:	
 	// Called every frame
