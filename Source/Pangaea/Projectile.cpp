@@ -2,6 +2,9 @@
 
 
 #include "Projectile.h"
+
+#include "Kismet/GameplayStatics.h"
+#include "PangaeaGameMode.h"
 #include "PlayerAvatar.h"
 
 // Sets default values
@@ -19,7 +22,10 @@ void AProjectile::BeginPlay()
 {
 	Super::BeginPlay();
 
-	_LifeCountingDown = Lifespan;
+	_PangaeaGameMode = Cast<APangaeaGameMode>(
+		UGameplayStatics::GetGameMode(GetWorld()));
+
+	Reset();
 }
 
 // Called every frame
@@ -56,7 +62,14 @@ void AProjectile::Tick(float DeltaTime)
 	}
 	else
 	{
-		PrimaryActorTick.bCanEverTick = false;
-		Destroy();
+		_PangaeaGameMode->RecycleFireball(this);
 	}
+}
+
+void AProjectile::Reset()
+{
+	_LifeCountingDown = Lifespan;
+	SetActorHiddenInGame(false);
+	SetActorEnableCollision(true);
+	SetActorTickEnabled(true);
 }

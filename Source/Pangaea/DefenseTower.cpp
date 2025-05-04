@@ -1,12 +1,15 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "DefenseTower.h"
-#include "PlayerAvatar.h"
-#include "Projectile.h"
 #include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Kismet/GameplayStatics.h"
+#include "PlayerAvatar.h"
+#include "Projectile.h"
+
+#include "PangaeaGameMode.h"
+
 
 // Sets default values
 ADefenseTower::ADefenseTower()
@@ -30,7 +33,9 @@ ADefenseTower::ADefenseTower()
 void ADefenseTower::BeginPlay()
 {
 	Super::BeginPlay();
-	SetActorTickInterval(0.5f);
+	SetActorTickInterval(0.75f);
+	
+	_PangaeaGameMode = Cast<APangaeaGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
 }
 
 // Called every frame
@@ -61,7 +66,7 @@ bool ADefenseTower::CanFire()
 
 void ADefenseTower::Fire()
 {
-	auto fireball = Cast<AProjectile>(GetWorld()->SpawnActor(_FireballClass));
+	auto fireball = _PangaeaGameMode->SpawnOrGetFireball(_FireballClass);
 
 	FVector startLocation = GetActorLocation();
 	startLocation.Z += 100.0f;

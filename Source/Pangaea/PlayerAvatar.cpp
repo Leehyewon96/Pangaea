@@ -1,12 +1,10 @@
 #include "PlayerAvatar.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "PlayerAvatarAnimInstance.h"
+#include "PangaeaAnimInstance.h"
 
 // Sets default values
 APlayerAvatar::APlayerAvatar()
 {
-	PrimaryActorTick.bCanEverTick = true;
-
 	// Don't rotate character to camera direction
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
@@ -39,20 +37,17 @@ APlayerAvatar::APlayerAvatar()
 void APlayerAvatar::BeginPlay()
 {
 	Super::BeginPlay();
-	_HealthPoints = HealthPoints;
 }
 
 // Called every frame
 void APlayerAvatar::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	auto animInst = Cast<UPlayerAvatarAnimInstance>(GetMesh()->GetAnimInstance());
-	animInst->Speed = GetCharacterMovement()->Velocity.Size2D();
+	_AnimInstance->Speed = GetCharacterMovement()->Velocity.Size2D();
 
 	if (_AttackCountingDown == AttackInterval)
 	{
-		animInst->State = EPlayerState::Attack;
+		_AnimInstance->State = ECharacterState::Attack;
 	}
 
 	if (_AttackCountingDown > 0.0f)
@@ -68,38 +63,30 @@ void APlayerAvatar::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 }
 
-int APlayerAvatar::GetHealthPoints()
+void APlayerAvatar::AttachWeapon(AWeapon* Weapon)
 {
-	return _HealthPoints;
+	Weapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale,
+		FName("hand_rSocket"));
 }
 
-
-bool APlayerAvatar::IsKilled()
+void APlayerAvatar::DropWeapon()
 {
-	return (_HealthPoints <= 0.0f);
+	TArray<AActor*> attachedActors;
+	GetAttachedActors(attachedActors, true);
+	for (int i = 0; i < attachedActors.Num(); ++i)
+	{
+		attachedActors[i]->DetachFromActor(
+			FDetachmentTransformRules::KeepWorldTransform);
+		attachedActors[i]->SetActorRotation(FQuat::Identity);
+		AWeapon* weapon = Cast<AWeapon>(attachedActors[i]);
+		if (weapon != nullptr)
+		{
+			weapon->Holder = nullptr;
+		}
+	}
 }
-
-
-bool APlayerAvatar::CanAttack()
-{
-	auto animInst = Cast<UPlayerAvatarAnimInstance>(GetMesh()->GetAnimInstance());
-	return (_AttackCountingDown <= 0.0f && animInst->State == EPlayerState::Locomotion);
-}
-
 
 void APlayerAvatar::Attack()
 {
-	_AttackCountingDown = AttackInterval;
-}
-
-void APlayerAvatar::Hit(int damage)
-{
-
-}
-
-void APlayerAvatar::DieProcess()
-{
-	PrimaryActorTick.bCanEverTick = false;
-	Destroy();
-	GEngine->ForceGarbageCollection(true);
+	Super::Attack();
 }

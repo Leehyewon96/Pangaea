@@ -12,7 +12,7 @@ UCLASS(Blueprintable)
 class PANGAEA_API AProjectile : public AActor
 {
 	GENERATED_BODY()
-
+	
 	public:
 	// Sets default values for this actor's properties
 	AProjectile();
@@ -34,9 +34,14 @@ protected:
 	UStaticMeshComponent* _MeshComponent;
 
 	float _LifeCountingDown;
+
+	class APangaeaGameMode* _PangaeaGameMode;
+
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	void Reset();
 
 	FORCEINLINE UStaticMeshComponent* GetMeshComponent() const { return _MeshComponent; }
 };

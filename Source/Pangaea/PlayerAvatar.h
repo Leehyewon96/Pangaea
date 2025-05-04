@@ -5,13 +5,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Character.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
+#include "PangaeaCharacter.h"
+#include "Weapon.h"
 #include "PlayerAvatar.generated.h"
 
 UCLASS(Blueprintable)
-class PANGAEA_API APlayerAvatar : public ACharacter
+class PANGAEA_API APlayerAvatar : public APangaeaCharacter
 {
 	GENERATED_BODY()
 
@@ -19,20 +20,6 @@ class PANGAEA_API APlayerAvatar : public ACharacter
 	// Sets default values for this character's properties
 	APlayerAvatar();
 
-	UPROPERTY(EditAnywhere, Category = "PlayerAvatar Params")
-	int HealthPoints = 500;			//the character's max health points
-
-	UPROPERTY(EditAnywhere, Category = "PlayerAvatar Params")
-	float Strength = 10;			//the character's attack strength
-
-	UPROPERTY(EditAnywhere, Category = "PlayerAvatar Params")
-	float Armer = 3;				//the character's defense armer
-
-	UPROPERTY(EditAnywhere, Category = "PlayerAvatar Params")
-	float AttackRange = 60.0f;		//the character's attack range
-
-	UPROPERTY(EditAnywhere, Category = "PlayerAvatar Params")
-	float AttackInterval = 1.2f;	//the character's attack invertal
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -47,18 +34,12 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	UFUNCTION(BlueprintCallable, Category = "Pangaea|PlayerCharacter", meta = (DisplayName = "Get HP"))
-	int GetHealthPoints();			//get current health points
+	UFUNCTION(BlueprintCallable, Category = "Pangaea|PlayerAvatar")
+	void AttachWeapon(AWeapon* Weapon);
 
-	UFUNCTION(BlueprintCallable, Category = "Pangaea|PlayerCharacter")
-	bool IsKilled();				//check if the character has been killed
-
-	UFUNCTION(BlueprintCallable, Category = "Pangaea|PlayerCharacter")
-	bool CanAttack();				//check if the character can attack
-
-	void Attack();					//attack
-	void Hit(int damage);			//process when the character is hit
-	void DieProcess();				//process when the character is killed
+	UFUNCTION(BlueprintCallable, Category = "Pangaea|PlayerAvatar")
+	void DropWeapon();
+	void Attack() override;
 
 	FORCEINLINE class UCameraComponent* GetCameraComponet() const { return _cameraComponent; }
 	FORCEINLINE class USpringArmComponent* GetSringArmComponet() const { return _springArmComponent; }

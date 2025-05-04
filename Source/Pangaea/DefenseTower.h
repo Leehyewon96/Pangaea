@@ -37,6 +37,8 @@ protected:
 	int _HealthPoints;				//the tower's current health points
 	float _ReloadCountingDown;		//reload counting down
 
+	class APangaeaGameMode* _PangaeaGameMode;
+
 private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Tower Component", meta = (AllowPrivateAccess = "true"))
