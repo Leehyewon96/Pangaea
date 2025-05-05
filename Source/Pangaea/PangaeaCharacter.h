@@ -1,7 +1,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "HealthBarWidget.h"
 #include "GameFramework/Character.h"
+
 #include "PangaeaCharacter.generated.h"
 
 UCLASS(Blueprintable)
@@ -13,7 +15,7 @@ public:
 	APangaeaCharacter();
 
 	UPROPERTY(EditAnywhere, Category = "Pangaea Character Params")
-	int HealthPoints = 1000;			//the character's max health points
+	int HealthPoints = 100;			//the character's max health points
 
 	UPROPERTY(EditAnywhere, Category = "Pangaea Character Params")
 	float Strength = 5;			//the character's attack strength
@@ -47,6 +49,21 @@ protected:
 	virtual void BeginPlay() override;
 
 	class UPangaeaAnimInstance* _AnimInstance;
+
+	UPROPERTY(ReplicatedUsing = OnRep_OnHealthPointsChanged)
 	int _HealthPoints;
+
 	float _AttackCountingDown;
+
+public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UUserWidget* HealthBarWidget;
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Attack_Broadcast_RPC();
+
+	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	UFUNCTION()
+	void OnRep_OnHealthPointsChanged();
 };

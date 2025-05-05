@@ -51,4 +51,8 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* _cameraComponent;
 
+public:
+	UFUNCTION(Server, Reliable)
+	void Attack_RPC();
+
 };

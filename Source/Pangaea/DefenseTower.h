@@ -13,7 +13,7 @@ class PANGAEA_API ADefenseTower : public AActor
 {
 	GENERATED_BODY()
 
-	public:
+public:
 	// Sets default values for this actor's properties
 	ADefenseTower();
 
@@ -28,6 +28,13 @@ class PANGAEA_API ADefenseTower : public AActor
 
 	UPROPERTY(EditAnywhere, Category = "Tower Params")
 	float ReloadInterval = 1.0f;	//the tower's reload interval
+
+	UPROPERTY(EditAnywhere, Category = "Tower Params")
+	bool IsBase = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UUserWidget* HealthBarWidget;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -64,8 +71,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Pangaea|Defense Tower")
 	bool CanFire();					//check if the tower can fire
 
+	UFUNCTION()
+	void OnHealthPointsChanged();
+
 	void Fire();					//fire a project tile
 	void Hit(int damage);			//process when the tower is hit
+	bool IsKilled();
+
 protected:
 	void DestroyProcess();			//process when the tower is destroyed
 

@@ -3,6 +3,7 @@
 #include "PangaeaGameMode.h"
 #include "PangaeaPlayerController.h"
 #include "PangaeaCharacter.h"
+#include "PangaeaGameState.h"
 #include "UObject/ConstructorHelpers.h"
 
 APangaeaGameMode::APangaeaGameMode()
@@ -23,6 +24,8 @@ APangaeaGameMode::APangaeaGameMode()
 	{
 		PlayerControllerClass = PlayerControllerBPClass.Class;
 	}
+
+	GameStateClass = APangaeaGameState::StaticClass();
 }
 
 APangaeaGameMode::~APangaeaGameMode()

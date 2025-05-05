@@ -7,8 +7,9 @@
 #include "Kismet/GameplayStatics.h"
 #include "PlayerAvatar.h"
 #include "Projectile.h"
-
 #include "PangaeaGameMode.h"
+#include "PangaeaGameState.h"
+#include <Net/UnrealNetwork.h>
 
 
 // Sets default values
@@ -43,7 +44,7 @@ void ADefenseTower::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (_Target != nullptr)
+	if (_Target != nullptr && GetNetMode() != NM_Client)
 	{
 		Fire();
 	}
@@ -64,6 +65,21 @@ bool ADefenseTower::CanFire()
 	return (_ReloadCountingDown <= 0.0f);
 }
 
+void ADefenseTower::OnHealthPointsChanged()
+{
+	if (HealthBarWidget != nullptr)
+	{
+		float normalizedHealth = FMath::Clamp((float)_HealthPoints / HealthPoints, 0.0f, 1.0f);
+		auto healthBar = Cast<UHealthBarWidget>(HealthBarWidget);
+		healthBar->HealthProgressBar->SetPercent(normalizedHealth);
+	}
+
+	if (IsKilled())
+	{
+		PrimaryActorTick.bCanEverTick = false;
+	}
+}
+
 void ADefenseTower::Fire()
 {
 	auto fireball = _PangaeaGameMode->SpawnOrGetFireball(_FireballClass);
@@ -80,6 +96,35 @@ void ADefenseTower::Fire()
 
 void ADefenseTower::Hit(int damage)
 {
+	if (IsKilled())
+	{
+		return;
+	}
+
+	if (GetNetMode() == ENetMode::NM_ListenServer && HasAuthority())
+	{
+		_HealthPoints -= damage;
+		OnHealthPointsChanged();
+
+		if (_HealthPoints <= 0)
+		{
+			if (IsBase)
+			{
+				APangaeaGameState* gameState = Cast<APangaeaGameState>(
+					UGameplayStatics::GetGameState(GetWorld()));
+				gameState->OnGameWin();
+			}
+			else
+			{
+				Destroy();
+			}
+		}
+	}
+}
+
+bool ADefenseTower::IsKilled()
+{
+	return (HealthPoints <= 0.0f);
 }
 
 void ADefenseTower::DestroyProcess()
